@@ -10,7 +10,8 @@ const useSecureCookies =
 export const authOptions: NextAuthOptions = {
   trustHost: true,
   useSecureCookies,
-  session: { strategy: "jwt" },  pages: {
+  session: { strategy: "jwt" },
+  pages: {
     signIn: "/admin/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
@@ -24,8 +25,10 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        const email = credentials.email.trim().toLowerCase();
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
         });
         if (!user) return null;
 
