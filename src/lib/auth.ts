@@ -8,7 +8,6 @@ const useSecureCookies =
   process.env.NEXTAUTH_URL?.startsWith("https://") ?? false;
 
 export const authOptions: NextAuthOptions = {
-  trustHost: true,
   useSecureCookies,
   session: { strategy: "jwt" },
   pages: {
