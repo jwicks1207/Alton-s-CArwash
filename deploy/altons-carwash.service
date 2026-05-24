@@ -1,0 +1,20 @@
+[Unit]
+Description=Alton's Carwash Next.js Application
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/altons-carwash
+EnvironmentFile=/var/www/altons-carwash/.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+RestartSec=10
+
+# Hardening
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

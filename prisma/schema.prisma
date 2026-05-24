@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+}
+
+model SiteSettings {
+  id                 String @id @default("default")
+  businessName       String @default("Alton's Carwash")
+  tagline            String @default("Professional car care you can trust")
+  heroTitle          String @default("Shine Bright. Drive Proud.")
+  heroSubtitle       String @default("Premium hand wash and detailing for every vehicle")
+  aboutTitle         String @default("About Us")
+  aboutBody          String @default("At Alton's Carwash, we treat every vehicle like our own. From quick express washes to full detailing, our team delivers spotless results with eco-friendly products and attention to detail.")
+  servicesTitle      String @default("Our Services")
+  servicesJson       String @default("[{\"title\":\"Express Wash\",\"description\":\"Exterior wash, tire shine, and window cleaning.\",\"price\":\"$15+\"},{\"title\":\"Full Service\",\"description\":\"Inside and out — vacuum, wipe-down, and premium finish.\",\"price\":\"$35+\"},{\"title\":\"Detailing\",\"description\":\"Deep clean, wax, and interior restoration.\",\"price\":\"$75+\"}]")
+  contactPhone       String @default("(555) 123-4567")
+  contactEmail       String @default("info@altonscarwash.com")
+  contactAddress     String @default("123 Main Street, Your City, ST 12345")
+  hoursJson          String @default("[{\"days\":\"Mon–Fri\",\"hours\":\"8:00 AM – 6:00 PM\"},{\"days\":\"Saturday\",\"hours\":\"9:00 AM – 5:00 PM\"},{\"days\":\"Sunday\",\"hours\":\"10:00 AM – 4:00 PM\"}]")
+  notificationEmail  String @default("")
+  smtpHost           String @default("")
+  smtpPort           String @default("587")
+  smtpUser           String @default("")
+  smtpPass           String @default("")
+  smtpFrom               String  @default("")
+  mobileCarwashEnabled   Boolean @default(false)
+  acceptedZipcodesJson   String  @default("[]")
+}
+
+enum TestimonialStatus {
+  PENDING
+  APPROVED
+}
+
+model Testimonial {
+  id        String            @id @default(cuid())
+  name      String
+  quote     String
+  rating    Int               @default(5)
+  status    TestimonialStatus @default(APPROVED)
+  sortOrder Int               @default(0)
+  createdAt DateTime          @default(now())
+}
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+  url       String
+  caption   String   @default("")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+enum AppointmentStatus {
+  BOOKED
+  CONFIRMED
+  CANCELED
+}
+
+enum AppointmentSource {
+  ONLINE
+  CALL_IN
+}
+
+model Appointment {
+  id        String            @id @default(cuid())
+  name      String
+  phone     String
+  carType   String
+  date      String
+  time      String
+  comments  String            @default("")
+  isMobile  Boolean           @default(false)
+  address   String            @default("")
+  zipCode   String            @default("")
+  status    AppointmentStatus @default(BOOKED)
+  source    AppointmentSource @default(ONLINE)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
