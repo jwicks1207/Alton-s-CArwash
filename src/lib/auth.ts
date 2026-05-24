@@ -3,11 +3,17 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 
+/** Only use secure cookies when the public URL is HTTPS (required for HTTP-only VM deploys). */
+const useSecureCookies =
+  process.env.NEXTAUTH_URL?.startsWith("https://") ?? false;
+
 export const authOptions: NextAuthOptions = {
-  session: { strategy: "jwt" },
-  pages: {
+  trustHost: true,
+  useSecureCookies,
+  session: { strategy: "jwt" },  pages: {
     signIn: "/admin/login",
   },
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: "credentials",

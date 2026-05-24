@@ -4,10 +4,34 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 
+/** Avoid redirecting to https:// when the site is only served over http:// */
+function safeCallbackUrl(raw: string | null): string {
+  if (!raw) return "/admin";
+  if (raw.startsWith("/") && !raw.startsWith("//")) return raw;
+
+  try {
+    const url = new URL(raw, window.location.origin);
+    // Full URL with wrong scheme (e.g. https while on http) → use path only
+    if (
+      url.protocol === "https:" &&
+      window.location.protocol === "http:"
+    ) {
+      return url.pathname + url.search || "/admin";
+    }
+    if (url.origin === window.location.origin) {
+      return url.pathname + url.search || "/admin";
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return "/admin";
+}
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/admin";
+  const callbackUrl = safeCallbackUrl(searchParams.get("callbackUrl"));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
