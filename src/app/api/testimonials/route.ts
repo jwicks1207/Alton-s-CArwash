@@ -21,7 +21,16 @@ export async function GET() {
     },
   });
 
-  return NextResponse.json(testimonials);
+  const payload = testimonials.map((t) => ({
+    ...t,
+    createdAt: t.createdAt.toISOString(),
+  }));
+
+  return NextResponse.json(payload, {
+    headers: {
+      "Cache-Control": "no-store, max-age=0",
+    },
+  });
 }
 
 export async function POST(request: Request) {

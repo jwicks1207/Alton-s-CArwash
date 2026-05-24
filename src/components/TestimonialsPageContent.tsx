@@ -23,6 +23,20 @@ function listSignature(items: TestimonialItem[]): string {
   return items.map((t) => t.id).join(",");
 }
 
+/** Never drop reviews the UI already has (avoids stale API/cache flashing back to seed data). */
+function mergeTestimonials(
+  current: TestimonialItem[],
+  incoming: TestimonialItem[]
+): TestimonialItem[] {
+  const byId = new Map<string, TestimonialItem>();
+  for (const t of current) byId.set(t.id, t);
+  for (const t of incoming) byId.set(t.id, t);
+  return Array.from(byId.values()).sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
 export function TestimonialsPageContent({
   businessName,
   initialTestimonials,
@@ -40,23 +54,27 @@ export function TestimonialsPageContent({
   const signatureRef = useRef(listSignature(initialTestimonials));
 
   const applyTestimonials = useCallback((data: TestimonialItem[]) => {
-    const nextSig = listSignature(data);
-    if (nextSig === signatureRef.current) return;
+    setTestimonials((current) => {
+      const merged = mergeTestimonials(current, data);
+      const nextSig = listSignature(merged);
+      if (nextSig === signatureRef.current) return current;
 
-    const prevIds = new Set(
-      signatureRef.current ? signatureRef.current.split(",") : []
-    );
-    const addedIds = data
-      .filter((t) => !prevIds.has(t.id))
-      .map((t) => t.id);
+      const prevIds = new Set(
+        signatureRef.current ? signatureRef.current.split(",").filter(Boolean) : []
+      );
+      const addedIds = merged
+        .filter((t) => !prevIds.has(t.id))
+        .map((t) => t.id);
 
-    signatureRef.current = nextSig;
-    setTestimonials(data);
+      signatureRef.current = nextSig;
 
-    if (addedIds.length > 0) {
-      setEnteringIds(new Set(addedIds));
-      window.setTimeout(() => setEnteringIds(new Set()), 700);
-    }
+      if (addedIds.length > 0) {
+        setEnteringIds(new Set(addedIds));
+        window.setTimeout(() => setEnteringIds(new Set()), 700);
+      }
+
+      return merged;
+    });
   }, []);
 
   const fetchTestimonials = useCallback(async () => {
@@ -73,12 +91,7 @@ export function TestimonialsPageContent({
     }
   }, [applyTestimonials]);
 
-  // Sync once after load (catches approvals without flashing back to an old static list)
-  useEffect(() => {
-    fetchTestimonials();
-  }, [fetchTestimonials]);
-
-  // Gentle background refresh while the tab is open
+  // Gentle background refresh while the tab is open (no fetch on mount — that caused flash)
   useEffect(() => {
     const interval = window.setInterval(() => {
       if (document.visibilityState === "visible") {

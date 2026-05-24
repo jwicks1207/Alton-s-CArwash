@@ -39,10 +39,16 @@ sudo systemctl enable "$SERVICE_NAME"
 sudo systemctl restart "$SERVICE_NAME"
 
 echo "==> Configuring Nginx..."
-sudo cp deploy/nginx-altons-carwash.conf /etc/nginx/sites-available/altons-carwash
-sudo sed -i "s|/var/www/altons-carwash|$APP_DIR|g" /etc/nginx/sites-available/altons-carwash
-sudo ln -sf /etc/nginx/sites-available/altons-carwash /etc/nginx/sites-enabled/
-sudo rm -f /etc/nginx/sites-enabled/default
+NGINX_SITE="/etc/nginx/sites-available/altons-carwash"
+if [[ -f "$NGINX_SITE" ]] && grep -q 'ssl_certificate' "$NGINX_SITE"; then
+  echo "    SSL config detected — keeping HTTPS settings, updating app paths only."
+  sudo sed -i "s|/var/www/altons-carwash|$APP_DIR|g" "$NGINX_SITE"
+else
+  sudo cp deploy/nginx-altons-carwash.conf "$NGINX_SITE"
+  sudo sed -i "s|/var/www/altons-carwash|$APP_DIR|g" "$NGINX_SITE"
+  sudo ln -sf "$NGINX_SITE" /etc/nginx/sites-enabled/
+  sudo rm -f /etc/nginx/sites-enabled/default
+fi
 sudo nginx -t
 sudo systemctl reload nginx
 
