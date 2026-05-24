@@ -15,6 +15,7 @@ export default async function PublicLayout({
       <main style={{ flex: 1 }}>{children}</main>
       <Footer
         businessName={content.businessName}
+        tagline={content.tagline}
         contactPhone={content.contactPhone}
         contactEmail={content.contactEmail}
         contactAddress={content.contactAddress}

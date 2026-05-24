@@ -1,8 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
+import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
 export default async function GalleryPage() {
+  noStore();
   const images = await prisma.galleryImage.findMany({
     orderBy: { sortOrder: "asc" },
   });

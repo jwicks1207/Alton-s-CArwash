@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "./prisma";
 import { parseAcceptedZipcodes } from "./zipcodes";
 
@@ -36,6 +37,7 @@ function parseJson<T>(json: string, fallback: T): T {
 }
 
 export async function getSiteContent(): Promise<SiteContent> {
+  noStore();
   const settings = await prisma.siteSettings.findUnique({
     where: { id: "default" },
   });
@@ -74,6 +76,7 @@ export type BookingSettings = {
 };
 
 export async function getBookingSettings(): Promise<BookingSettings> {
+  noStore();
   const settings = await prisma.siteSettings.findUnique({
     where: { id: "default" },
   });

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { revalidatePublicPages } from "@/lib/revalidate-public";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -18,6 +19,7 @@ export async function PUT(request: Request, { params }: Params) {
     where: { id },
     data: body,
   });
+  revalidatePublicPages();
   return NextResponse.json(item);
 }
 
@@ -29,5 +31,6 @@ export async function DELETE(_request: Request, { params }: Params) {
 
   const { id } = await params;
   await prisma.testimonial.delete({ where: { id } });
+  revalidatePublicPages();
   return NextResponse.json({ ok: true });
 }

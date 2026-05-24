@@ -2,11 +2,17 @@ import type { SiteContent } from "@/lib/settings";
 
 type FooterProps = Pick<
   SiteContent,
-  "businessName" | "contactPhone" | "contactEmail" | "contactAddress" | "hours"
+  | "businessName"
+  | "tagline"
+  | "contactPhone"
+  | "contactEmail"
+  | "contactAddress"
+  | "hours"
 >;
 
 export function Footer({
   businessName,
+  tagline,
   contactPhone,
   contactEmail,
   contactAddress,
@@ -18,7 +24,7 @@ export function Footer({
         <div className="footer-grid">
           <div>
             <h4>{businessName}</h4>
-            <p>Professional car care you can trust.</p>
+            <p>{tagline}</p>
           </div>
           <div>
             <h4>Contact</h4>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { revalidatePublicPages } from "@/lib/revalidate-public";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -29,6 +30,8 @@ export async function PUT(request: Request) {
     update: body,
     create: { id: "default", ...body },
   });
+
+  revalidatePublicPages();
 
   return NextResponse.json(settings);
 }
