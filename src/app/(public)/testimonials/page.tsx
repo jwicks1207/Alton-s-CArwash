@@ -2,6 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { getSiteContent } from "@/lib/settings";
 import { TestimonialsPageContent } from "@/components/TestimonialsPageContent";
 
+/** Always load fresh approved reviews from the database (avoids stale static snapshot). */
+export const dynamic = "force-dynamic";
+
 export default async function TestimonialsPage() {
   const content = await getSiteContent();
   const testimonials = await prisma.testimonial.findMany({

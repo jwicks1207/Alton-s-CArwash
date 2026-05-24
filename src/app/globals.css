@@ -784,19 +784,15 @@ img {
   border-radius: 3px;
 }
 
-.feed-card {
-  animation: fade-in 0.4s ease;
-}
-
-.feed-card.newest {
+.feed-card--enter {
+  animation: feed-card-enter 0.45s ease;
   border-left-color: var(--cyan);
-  box-shadow: 0 4px 20px rgba(0, 180, 216, 0.15);
 }
 
-@keyframes fade-in {
+@keyframes feed-card-enter {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;

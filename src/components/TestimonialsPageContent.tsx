@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 
@@ -17,34 +17,10 @@ type Props = {
   initialTestimonials: TestimonialItem[];
 };
 
-const POLL_MS = 12_000;
+const POLL_MS = 60_000;
 
-function StarPicker({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (n: number) => void;
-}) {
-  const [hover, setHover] = useState(0);
-
-  return (
-    <div className="star-picker" role="group" aria-label="Rating">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          className={`star-btn ${star <= (hover || value) ? "active" : ""}`}
-          onClick={() => onChange(star)}
-          onMouseEnter={() => setHover(star)}
-          onMouseLeave={() => setHover(0)}
-          aria-label={`${star} stars`}
-        >
-          ★
-        </button>
-      ))}
-    </div>
-  );
+function listSignature(items: TestimonialItem[]): string {
+  return items.map((t) => t.id).join(",");
 }
 
 export function TestimonialsPageContent({
@@ -53,6 +29,7 @@ export function TestimonialsPageContent({
 }: Props) {
   const [testimonials, setTestimonials] =
     useState<TestimonialItem[]>(initialTestimonials);
+  const [enteringIds, setEnteringIds] = useState<Set<string>>(new Set());
   const [name, setName] = useState("");
   const [quote, setQuote] = useState("");
   const [rating, setRating] = useState(5);
@@ -60,26 +37,55 @@ export function TestimonialsPageContent({
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [errorMsg, setErrorMsg] = useState("");
-  const [liveIndicator, setLiveIndicator] = useState(false);
+  const signatureRef = useRef(listSignature(initialTestimonials));
 
-  const fetchTestimonials = useCallback(async () => {
-    try {
-      const res = await fetch("/api/testimonials", { cache: "no-store" });
-      if (!res.ok) return;
-      const data: TestimonialItem[] = await res.json();
-      setTestimonials(data);
-    } catch {
-      /* ignore poll errors */
+  const applyTestimonials = useCallback((data: TestimonialItem[]) => {
+    const nextSig = listSignature(data);
+    if (nextSig === signatureRef.current) return;
+
+    const prevIds = new Set(
+      signatureRef.current ? signatureRef.current.split(",") : []
+    );
+    const addedIds = data
+      .filter((t) => !prevIds.has(t.id))
+      .map((t) => t.id);
+
+    signatureRef.current = nextSig;
+    setTestimonials(data);
+
+    if (addedIds.length > 0) {
+      setEnteringIds(new Set(addedIds));
+      window.setTimeout(() => setEnteringIds(new Set()), 700);
     }
   }, []);
 
+  const fetchTestimonials = useCallback(async () => {
+    try {
+      const res = await fetch("/api/testimonials", {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+      });
+      if (!res.ok) return;
+      const data: TestimonialItem[] = await res.json();
+      applyTestimonials(data);
+    } catch {
+      /* ignore */
+    }
+  }, [applyTestimonials]);
+
+  // Sync once after load (catches approvals without flashing back to an old static list)
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchTestimonials();
-      setLiveIndicator(true);
-      setTimeout(() => setLiveIndicator(false), 600);
+    fetchTestimonials();
+  }, [fetchTestimonials]);
+
+  // Gentle background refresh while the tab is open
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        fetchTestimonials();
+      }
     }, POLL_MS);
-    return () => clearInterval(interval);
+    return () => window.clearInterval(interval);
   }, [fetchTestimonials]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -103,7 +109,6 @@ export function TestimonialsPageContent({
       setName("");
       setQuote("");
       setRating(5);
-      await fetchTestimonials();
     } catch (err) {
       setStatus("error");
       setErrorMsg(err instanceof Error ? err.message : "Something went wrong");
@@ -116,13 +121,9 @@ export function TestimonialsPageContent({
         <header className="testimonials-hero">
           <h1 className="section-title">Customer Reviews</h1>
           <p className="section-subtitle">
-            Share your experience at {businessName} — reviews update live as
-            they&apos;re approved.
+            Share your experience at {businessName}. New reviews appear here
+            after we approve them.
           </p>
-          <div className={`live-badge ${liveIndicator ? "pulse" : ""}`}>
-            <span className="live-dot" />
-            Live feed
-          </div>
         </header>
 
         <div className="testimonials-layout">
@@ -212,7 +213,9 @@ export function TestimonialsPageContent({
           <div className="testimonials-feed-panel">
             <div className="feed-header">
               <h2>Recent Reviews</h2>
-              <span className="feed-count">{testimonials.length} published</span>
+              <span className="feed-count">
+                {testimonials.length} published
+              </span>
             </div>
 
             <div className="testimonials-feed">
@@ -222,10 +225,12 @@ export function TestimonialsPageContent({
                   <p>Be the first to share your experience!</p>
                 </div>
               ) : (
-                testimonials.map((t, index) => (
+                testimonials.map((t) => (
                   <article
                     key={t.id}
-                    className={`testimonial-card feed-card ${index === 0 ? "newest" : ""}`}
+                    className={`testimonial-card feed-card${
+                      enteringIds.has(t.id) ? " feed-card--enter" : ""
+                    }`}
                   >
                     <div className="feed-card-top">
                       <div className="stars">{"★".repeat(t.rating)}</div>
@@ -249,5 +254,33 @@ export function TestimonialsPageContent({
         </div>
       </div>
     </section>
+  );
+}
+
+function StarPicker({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+}) {
+  const [hover, setHover] = useState(0);
+
+  return (
+    <div className="star-picker" role="group" aria-label="Rating">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          className={`star-btn ${star <= (hover || value) ? "active" : ""}`}
+          onClick={() => onChange(star)}
+          onMouseEnter={() => setHover(star)}
+          onMouseLeave={() => setHover(0)}
+          aria-label={`${star} stars`}
+        >
+          ★
+        </button>
+      ))}
+    </div>
   );
 }
