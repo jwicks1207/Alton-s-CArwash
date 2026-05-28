@@ -6,6 +6,7 @@ import {
   zipcodesFromText,
   zipcodesToText,
 } from "@/lib/zipcodes";
+import { GMAIL_SMTP_DEFAULTS } from "@/lib/smtp";
 
 type Settings = {
   notificationEmail: string;
@@ -139,9 +140,65 @@ export function SettingsEditor() {
       <div className="admin-panel">
         <h3>SMTP (Email Sending)</h3>
         <p style={{ marginBottom: "1rem", color: "var(--gray)", fontSize: "0.9rem" }}>
-          Configure your email provider (Gmail, Outlook, SendGrid, etc.). You can also
+          For Gmail, use an App Password (not your normal Gmail password). You can also
           set SMTP_HOST, SMTP_USER, SMTP_PASS in .env as a fallback.
         </p>
+
+        <div
+          className="alert"
+          style={{
+            marginBottom: "1rem",
+            fontSize: "0.9rem",
+            background: "var(--light, #f8fafc)",
+            border: "1px solid var(--border, #e2e8f0)",
+          }}
+        >
+          <strong>Gmail setup</strong>
+          <ol style={{ margin: "0.5rem 0 0 1.1rem", padding: 0 }}>
+            <li>
+              Turn on{" "}
+              <a
+                href="https://myaccount.google.com/signinoptions/two-step-verification"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                2-Step Verification
+              </a>{" "}
+              for your Google account.
+            </li>
+            <li>
+              Create an{" "}
+              <a
+                href="https://myaccount.google.com/apppasswords"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                App Password
+              </a>{" "}
+              (Mail → Other → name it e.g. &ldquo;Alton&apos;s Carwash&rdquo;).
+            </li>
+            <li>
+              Paste the 16-character password below (spaces are OK). Use your full
+              @gmail.com address as username and the same address as From.
+            </li>
+          </ol>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            style={{ marginTop: "0.75rem" }}
+            onClick={() =>
+              setSettings({
+                ...settings,
+                smtpHost: GMAIL_SMTP_DEFAULTS.smtpHost,
+                smtpPort: GMAIL_SMTP_DEFAULTS.smtpPort,
+                smtpFrom: settings.smtpFrom || settings.smtpUser,
+              })
+            }
+          >
+            Apply Gmail SMTP defaults
+          </button>
+        </div>
+
         <div className="form-row">
           <div className="form-group">
             <label>SMTP Host</label>
@@ -166,33 +223,39 @@ export function SettingsEditor() {
         </div>
         <div className="form-row">
           <div className="form-group">
-            <label>SMTP Username</label>
+            <label>SMTP Username (Gmail address)</label>
             <input
+              type="email"
               value={settings.smtpUser}
               onChange={(e) =>
                 setSettings({ ...settings, smtpUser: e.target.value })
               }
+              placeholder="you@gmail.com"
+              autoComplete="username"
             />
           </div>
           <div className="form-group">
-            <label>SMTP Password</label>
+            <label>SMTP Password (Gmail App Password)</label>
             <input
               type="password"
               value={settings.smtpPass}
               onChange={(e) =>
                 setSettings({ ...settings, smtpPass: e.target.value })
               }
+              placeholder="16-character app password"
+              autoComplete="new-password"
             />
           </div>
         </div>
         <div className="form-group">
-          <label>From Address</label>
+          <label>From Address (use the same Gmail address)</label>
           <input
+            type="email"
             value={settings.smtpFrom}
             onChange={(e) =>
               setSettings({ ...settings, smtpFrom: e.target.value })
             }
-            placeholder="noreply@yourdomain.com"
+            placeholder="you@gmail.com"
           />
         </div>
       </div>

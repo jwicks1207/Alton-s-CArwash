@@ -1,5 +1,5 @@
-import nodemailer from "nodemailer";
 import type { SiteSettings } from "@prisma/client";
+import { createSmtpTransporter } from "@/lib/smtp";
 
 type AppointmentEmailData = {
   name: string;
@@ -39,11 +39,11 @@ export async function sendAppointmentEmail(
     return { ok: false, error: "SMTP not configured" };
   }
 
-  const transporter = nodemailer.createTransport({
+  const transporter = createSmtpTransporter({
     host,
     port,
-    secure: port === 465,
-    auth: { user, pass },
+    user,
+    pass,
   });
 
   const mobileRows = data.isMobile

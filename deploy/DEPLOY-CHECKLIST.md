@@ -17,7 +17,7 @@ Use this before going live on a Google Cloud VM.
   - [ ] `NEXTAUTH_URL` = your public URL (`http://IP` or `https://domain`)
   - [ ] `NEXTAUTH_SECRET` = output of `openssl rand -base64 32`
   - [ ] `DATABASE_URL` = `file:/var/www/altons-carwash/prisma/dev.db`
-- [ ] `./deploy/deploy.sh`
+- [ ] `bash deploy/deploy.sh` (or `chmod +x deploy/deploy.sh` then `./deploy/deploy.sh`)
 
 ## After deploy (security)
 
