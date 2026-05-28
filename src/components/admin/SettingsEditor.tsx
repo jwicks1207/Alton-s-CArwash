@@ -6,7 +6,7 @@ import {
   zipcodesFromText,
   zipcodesToText,
 } from "@/lib/zipcodes";
-import { GMAIL_SMTP_DEFAULTS } from "@/lib/smtp";
+import { GMAIL_SMTP_DEFAULTS } from "@/lib/smtp-config";
 
 type Settings = {
   notificationEmail: string;
