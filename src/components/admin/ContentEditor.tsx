@@ -11,6 +11,7 @@ type Settings = {
   aboutTitle: string;
   aboutBody: string;
   servicesTitle: string;
+  servicesPricingPolicy: string;
   servicesJson: string;
   contactPhone: string;
   contactEmail: string;
@@ -203,11 +204,12 @@ export function ContentEditor() {
             <div className="form-group">
               <label>Description</label>
               <textarea
-                rows={2}
+                rows={4}
                 value={s.description}
                 onChange={(e) =>
                   updateService(i, "description", e.target.value)
                 }
+                placeholder="Line breaks you enter here will appear on the home page."
               />
             </div>
             <div className="form-group">
@@ -229,6 +231,23 @@ export function ContentEditor() {
         <button type="button" className="btn btn-secondary btn-sm" onClick={addService}>
           + Add Service
         </button>
+        <div className="form-group" style={{ marginTop: "1.5rem" }}>
+          <label>Pricing policy (below service cards)</label>
+          <textarea
+            rows={5}
+            value={settings.servicesPricingPolicy}
+            onChange={(e) =>
+              setSettings({
+                ...settings,
+                servicesPricingPolicy: e.target.value,
+              })
+            }
+            placeholder={"Prices may vary by vehicle size.\nAdd-ons quoted on site."}
+          />
+          <p style={{ fontSize: "0.85rem", color: "var(--gray)", marginTop: "0.35rem" }}>
+            Shown centered under the pricing blocks. Line breaks are preserved.
+          </p>
+        </div>
       </div>
 
       <div className="admin-panel">

@@ -22,6 +22,7 @@ export type SiteContent = {
   aboutBody: string;
   servicesTitle: string;
   services: ServiceItem[];
+  servicesPricingPolicy: string;
   contactPhone: string;
   contactEmail: string;
   contactAddress: string;
@@ -56,6 +57,7 @@ export async function getSiteContent(): Promise<SiteContent> {
     aboutBody: settings.aboutBody,
     servicesTitle: settings.servicesTitle,
     services: parseJson<ServiceItem[]>(settings.servicesJson, []),
+    servicesPricingPolicy: settings.servicesPricingPolicy,
     contactPhone: settings.contactPhone,
     contactEmail: settings.contactEmail,
     contactAddress: settings.contactAddress,

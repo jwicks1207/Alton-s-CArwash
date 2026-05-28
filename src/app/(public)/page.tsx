@@ -33,22 +33,27 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section" style={{ background: "var(--white)" }}>
-        <div className="container">
+      <section className="section services-section" style={{ background: "var(--white)" }}>
+        <div className="container services-section-inner">
           <h2 className="section-title">{content.servicesTitle}</h2>
           <p className="section-subtitle">
             Choose the wash that fits your vehicle and schedule.
           </p>
-          <div className="card-grid">
+          <div className="services-grid">
             {content.services.map((service) => (
-              <article key={service.title} className="card">
+              <article key={service.title} className="card service-card">
                 <h3>{service.title}</h3>
-                <p>{service.description}</p>
+                <p className="preserve-lines">{service.description}</p>
                 <p className="price">{service.price}</p>
               </article>
             ))}
           </div>
-          <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+          {content.servicesPricingPolicy.trim() ? (
+            <p className="services-pricing-policy preserve-lines">
+              {content.servicesPricingPolicy}
+            </p>
+          ) : null}
+          <div className="services-cta">
             <Link href="/book" className="btn btn-primary">
               Schedule Your Wash
             </Link>

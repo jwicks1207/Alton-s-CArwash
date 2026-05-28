@@ -216,6 +216,60 @@ img {
   max-width: 560px;
 }
 
+.preserve-lines {
+  white-space: pre-line;
+}
+
+/* Services (home) */
+.services-section-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.services-section .section-title,
+.services-section .section-subtitle {
+  text-align: center;
+}
+
+.services-section .section-subtitle {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.services-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.service-card {
+  flex: 1 1 280px;
+  max-width: 340px;
+  text-align: center;
+}
+
+.service-card .preserve-lines {
+  margin-bottom: 0;
+}
+
+.services-pricing-policy {
+  margin-top: 2rem;
+  max-width: 640px;
+  color: var(--gray);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.services-cta {
+  margin-top: 2.5rem;
+  text-align: center;
+}
+
 /* Cards */
 .card-grid {
   display: grid;
