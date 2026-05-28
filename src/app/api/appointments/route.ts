@@ -25,9 +25,6 @@ export async function POST(request: Request) {
     const data = schema.parse(body);
 
     const settings = await getNotificationSettings();
-    if (!settings) {
-      return NextResponse.json({ error: "Server error" }, { status: 500 });
-    }
 
     const mobileCheck = validateMobileBooking(settings, {
       isMobile: data.isMobile,
@@ -58,7 +55,7 @@ export async function POST(request: Request) {
       },
     });
 
-    await sendAppointmentEmail(settings, {
+    const emailResult = await sendAppointmentEmail(settings, {
       name: data.name,
       phone: data.phone,
       carType: data.carType,
@@ -70,6 +67,10 @@ export async function POST(request: Request) {
       address: data.isMobile ? data.address!.trim() : "",
       zipCode: data.isMobile ? normalizeZipCode(data.zipCode!) : "",
     });
+
+    if (!emailResult.ok) {
+      console.warn("Appointment saved but notification email failed:", emailResult.error);
+    }
 
     return NextResponse.json({ ok: true, id: appointment.id });
   } catch (error) {

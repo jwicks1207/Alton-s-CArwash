@@ -67,6 +67,12 @@ export async function getNotificationSettings() {
   const settings = await prisma.siteSettings.findUnique({
     where: { id: "default" },
   });
+
+  if (!settings) {
+    await prisma.siteSettings.create({ data: {} });
+    return getNotificationSettings();
+  }
+
   return settings;
 }
 

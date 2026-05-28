@@ -88,6 +88,14 @@ Additional Comments: ${data.comments || "(none)"}
     </table>
   `;
 
-  await transporter.sendMail({ from, to, subject, text, html });
-  return { ok: true };
+  try {
+    await transporter.sendMail({ from, to, subject, text, html });
+    return { ok: true };
+  } catch (error) {
+    console.error("Failed to send appointment email:", error);
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Email send failed",
+    };
+  }
 }
